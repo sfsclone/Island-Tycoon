@@ -2348,7 +2348,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2068546128}
   - component: {fileID: 2068546129}
-  - component: {fileID: 2068546131}
   m_Layer: 0
   m_Name: BoundaryManager
   m_TagString: Untagged
@@ -2386,19 +2385,6 @@ MonoBehaviour:
   boundaryThickness: 1
   islandSize: {x: 40, y: 20}
   boundaryHeight: 10
---- !u!114 &2068546131
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2068546126}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ce7065c54724344db1d20ab662e10ca, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  movementThreshold: 0.1
 --- !u!1 &2069363804
 GameObject:
   m_ObjectHideFlags: 0
