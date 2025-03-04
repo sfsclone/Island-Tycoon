@@ -76,11 +76,12 @@ public class TreeChopping : MonoBehaviour
         }
 
         // Set wood amount on the prefab
-        WoodItem woodItem = wood.GetComponent<WoodItem>();
-        if (woodItem != null)
+        ResourceItem resourceItem = wood.GetComponent<ResourceItem>();
+        if (resourceItem != null)
         {
-            woodItem.woodAmount = woodAmount; // This will be 5 (set in inspector)
+            resourceItem.resourceAmount = woodAmount; // This will be 5 (set in inspector)
         }
+
 
         // Destroy the tree after spawning wood
         Destroy(gameObject);

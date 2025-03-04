@@ -1,11 +1,12 @@
 using UnityEngine;
 using System.Collections;
 
-public class WoodExchanger : MonoBehaviour
+public class ResourceExchanger : MonoBehaviour
 {
     public float exchangeInterval = 1.0f; // Time between each exchange
     private bool isExchanging = false;
     private bool playerInRange = false;
+    public ResourceItem.ResourceType resourceType = ResourceItem.ResourceType.Wood; // Default resource type
 
     private void OnTriggerEnter(Collider other)
     {
@@ -13,7 +14,7 @@ public class WoodExchanger : MonoBehaviour
         {
             playerInRange = true;
             if (!isExchanging)
-                StartCoroutine(ExchangeWood());
+                StartCoroutine(ExchangeResource());
         }
     }
 
@@ -27,20 +28,24 @@ public class WoodExchanger : MonoBehaviour
 
     private void Update()
     {
-        if (playerInRange && !isExchanging && Inventory.Instance.GetResourceAmount("Wood") > 0)
+        if (playerInRange && !isExchanging && Inventory.Instance.GetResourceAmount(resourceType.ToString()) > 0)
         {
-            StartCoroutine(ExchangeWood());
+            StartCoroutine(ExchangeResource());
         }
     }
 
-    private IEnumerator ExchangeWood()
+    private IEnumerator ExchangeResource()
     {
         isExchanging = true;
 
-        while (playerInRange && Inventory.Instance.GetResourceAmount("Wood") > 0)
+        while (playerInRange && Inventory.Instance.GetResourceAmount(resourceType.ToString()) > 0)
         {
-            Inventory.Instance.RemoveResource("Wood", 1);
+            Inventory.Instance.RemoveResource(resourceType.ToString(), 1);
             Inventory.Instance.AddResource("Coin", 1);
+
+            // Remove visually stacked resource
+            ResourceItem.RemoveResourceVisual(resourceType);
+
             yield return new WaitForSeconds(exchangeInterval);
         }
 

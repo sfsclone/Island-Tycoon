@@ -8,11 +8,12 @@ TagManager:
   - Ground
   - Wood
   - Plot
+  - Stone
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Ground
   - Water
   - UI
   - 

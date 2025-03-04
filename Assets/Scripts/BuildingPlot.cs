@@ -1,4 +1,3 @@
-//BuildingPlot.cs
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
@@ -6,9 +5,10 @@ using System.Collections;
 public class BuildingPlot : MonoBehaviour
 {
     public GameObject finishedBuilding;
-    public int requiredWood = 5;
-    private int currentWood = 0;
-    public float buildInterval = 1.0f; // Time between each wood submission
+    public ResourceItem.ResourceType requiredResource = ResourceItem.ResourceType.Wood; // Default required resource
+    public int requiredAmount = 5;
+    private int currentAmount = 0;
+    public float buildInterval = 1.0f; // Time between each resource submission
     private bool isBuilding = false;
     public Slider buildProgressBar; // Assign in Inspector
     private bool playerInRange = false;
@@ -18,7 +18,7 @@ public class BuildingPlot : MonoBehaviour
         if (buildProgressBar != null)
         {
             buildProgressBar.gameObject.SetActive(false); // Hide slider at start
-            buildProgressBar.maxValue = requiredWood;
+            buildProgressBar.maxValue = requiredAmount;
             buildProgressBar.value = 0;
         }
     }
@@ -47,7 +47,7 @@ public class BuildingPlot : MonoBehaviour
     {
         isBuilding = true;
 
-        while (currentWood < requiredWood && Inventory.Instance.GetResourceAmount("Wood") > 0)
+        while (currentAmount < requiredAmount && Inventory.Instance.GetResourceAmount(requiredResource.ToString()) > 0)
         {
             if (!playerInRange)
             {
@@ -55,25 +55,25 @@ public class BuildingPlot : MonoBehaviour
                 yield break; // Stop coroutine if player leaves
             }
 
-            Inventory.Instance.RemoveResource("Wood", 1);
-            currentWood++;
+            Inventory.Instance.RemoveResource(requiredResource.ToString(), 1);
+            currentAmount++;
 
             // Update slider
             if (buildProgressBar != null)
-                buildProgressBar.value = currentWood;
+                buildProgressBar.value = currentAmount;
 
             yield return new WaitForSeconds(buildInterval);
         }
 
-        if (currentWood >= requiredWood)
+        if (currentAmount >= requiredAmount)
         {
-            // Find the ground position to spawn the finished building
-            Vector3 spawnPosition = GetGroundPosition(transform.position);
+            // Get the building's height dynamically
+            float buildingHeight = finishedBuilding.GetComponent<Renderer>().bounds.size.y / 2f;
 
-            // Adjust the spawn position slightly above the ground level to avoid clipping
-            spawnPosition.y += 2.25f; // Adjust as needed based on the size of your building
+            // Find the correct ground position and apply height offset
+            Vector3 spawnPosition = GetGroundPosition(transform.position, buildingHeight);
 
-            // Instantiate the finished building at ground level with slight offset
+            // Instantiate the finished building
             Instantiate(finishedBuilding, spawnPosition, Quaternion.identity);
 
             // Remove the building plot after the building is complete
@@ -83,18 +83,21 @@ public class BuildingPlot : MonoBehaviour
         if (buildProgressBar != null)
             buildProgressBar.gameObject.SetActive(false); // Hide slider after completion
 
+        ResourceItem.RemoveResourceVisual(requiredResource); // Remove visual representation
         isBuilding = false;
     }
 
-    // Function to get the ground position using Raycast
-    private Vector3 GetGroundPosition(Vector3 position)
+    // Function to get the ground position with a height offset
+    // Adjust spawn position to ensure the bottom aligns with the ground
+    private Vector3 GetGroundPosition(Vector3 position, float heightOffset)
     {
         RaycastHit hit;
-        // Cast a ray downwards from a high point (e.g., 100 units above the position)
-        if (Physics.Raycast(position + Vector3.up * 100f, Vector3.down, out hit, 200f)) // increased range
+        int groundLayerMask = LayerMask.GetMask("Ground");
+
+        if (Physics.Raycast(position + Vector3.up * 100f, Vector3.down, out hit, 200f, groundLayerMask))
         {
-            return hit.point; // Return the point where the ray hits the ground
+            return hit.point + Vector3.up * (heightOffset / 2f); // Use half-height for proper alignment
         }
-        return position; // If no ground is found, return the original position (fallback)
+        return position;
     }
 }
