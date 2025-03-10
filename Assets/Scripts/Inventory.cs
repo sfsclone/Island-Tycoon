@@ -8,6 +8,11 @@ public class Inventory : MonoBehaviour
     private Dictionary<string, List<GameObject>> collectedResources = new Dictionary<string, List<GameObject>>(); // Stores actual objects
     public InventoryUI inventoryUI; // UI Reference
 
+    private void Start()
+    {
+        Inventory.Instance.AddResource("Coin", 50); // Give 50 coins at the start of the game
+    }
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -21,15 +26,19 @@ public class Inventory : MonoBehaviour
             items[resourceName] = 0;
         items[resourceName] += amount;
 
-        // Track GameObjects for stacking
-        if (!collectedResources.ContainsKey(resourceName))
-            collectedResources[resourceName] = new List<GameObject>();
+        // Track GameObjects only if they exist (e.g., wood, stone)
+        if (resourceObject != null)
+        {
+            if (!collectedResources.ContainsKey(resourceName))
+                collectedResources[resourceName] = new List<GameObject>();
 
-        collectedResources[resourceName].Add(resourceObject);
+            collectedResources[resourceName].Add(resourceObject);
+        }
 
         // Update UI
         inventoryUI?.UpdateInventory(items);
     }
+
 
     // Get count of a resource
     public int GetResourceAmount(string resourceName)
@@ -48,7 +57,7 @@ public class Inventory : MonoBehaviour
             if (items[resourceName] <= 0)
                 items.Remove(resourceName);
 
-            // Also remove the physical GameObjects
+            // Only remove GameObjects if they exist
             if (collectedResources.ContainsKey(resourceName))
             {
                 for (int i = 0; i < amount; i++)
@@ -70,6 +79,7 @@ public class Inventory : MonoBehaviour
             inventoryUI?.UpdateInventory(items);
         }
     }
+
 
     // Get the list of collected GameObjects for a resource
     public List<GameObject> GetCollectedResources(string resourceName)

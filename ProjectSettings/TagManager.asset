@@ -9,6 +9,7 @@ TagManager:
   - Wood
   - Plot
   - Stone
+  - Island
   layers:
   - Default
   - TransparentFX
