@@ -10,7 +10,7 @@ public class Inventory : MonoBehaviour
 
     private void Start()
     {
-        Inventory.Instance.AddResource("Coin", 50); // Give 50 coins at the start of the game
+        Inventory.Instance.AddResource("Coin", 100); // Give coins at the start of the game
     }
 
     private void Awake()
@@ -21,12 +21,10 @@ public class Inventory : MonoBehaviour
     // Add resource and store its GameObject
     public void AddResource(string resourceName, int amount, GameObject resourceObject = null)
     {
-        // Track counts
         if (!items.ContainsKey(resourceName))
             items[resourceName] = 0;
         items[resourceName] += amount;
 
-        // Track GameObjects only if they exist (e.g., wood, stone)
         if (resourceObject != null)
         {
             if (!collectedResources.ContainsKey(resourceName))
@@ -35,10 +33,8 @@ public class Inventory : MonoBehaviour
             collectedResources[resourceName].Add(resourceObject);
         }
 
-        // Update UI
         inventoryUI?.UpdateInventory(items);
     }
-
 
     // Get count of a resource
     public int GetResourceAmount(string resourceName)
@@ -57,35 +53,42 @@ public class Inventory : MonoBehaviour
             if (items[resourceName] <= 0)
                 items.Remove(resourceName);
 
-            // Only remove GameObjects if they exist
             if (collectedResources.ContainsKey(resourceName))
             {
                 for (int i = 0; i < amount; i++)
                 {
                     if (collectedResources[resourceName].Count > 0)
                     {
-                        GameObject obj = collectedResources[resourceName][0]; // Get first collected object
+                        GameObject obj = collectedResources[resourceName][0];
                         collectedResources[resourceName].RemoveAt(0);
-                        Destroy(obj); // Destroy the object in the scene
+                        Destroy(obj);
                     }
                 }
 
-                // Remove the key if no more objects left
                 if (collectedResources[resourceName].Count == 0)
                     collectedResources.Remove(resourceName);
             }
 
-            // Update UI
             inventoryUI?.UpdateInventory(items);
         }
     }
 
-
-    // Get the list of collected GameObjects for a resource
+    // Get collected GameObjects for a resource
     public List<GameObject> GetCollectedResources(string resourceName)
     {
         if (collectedResources.ContainsKey(resourceName))
             return collectedResources[resourceName];
         return new List<GameObject>();
+    }
+
+    // npc
+    public bool HasEnoughCoins(int amount)
+    {
+        return GetResourceAmount("Coin") >= amount;
+    }
+
+    public void SpendCoins(int amount)
+    {
+        RemoveResource("Coin", amount);
     }
 }

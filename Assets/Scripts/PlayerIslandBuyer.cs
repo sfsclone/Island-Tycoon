@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerIslandBuyer : MonoBehaviour
 {
@@ -15,5 +16,11 @@ public class PlayerIslandBuyer : MonoBehaviour
     public void TryBuyIsland()
     {
         IslandManager.Instance.BuyNewIsland(transform.position);
+    }
+
+    
+    public void OnBuyIslandButtonPressed()
+    {
+        TryBuyIsland();
     }
 }

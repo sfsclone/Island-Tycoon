@@ -10,7 +10,7 @@ public class AutoResourceGathering : MonoBehaviour
         foreach (var hitCollider in hitColliders)
         {
             // Check for trees
-            TreeChopping tree = hitCollider.GetComponent<TreeChopping>();
+            Tree tree = hitCollider.GetComponent<Tree>();
             if (tree != null)
             {
                 tree.StartChopping();
@@ -18,10 +18,10 @@ public class AutoResourceGathering : MonoBehaviour
             }
 
             // Check for rocks
-            RockBreaking rock = hitCollider.GetComponent<RockBreaking>();
-            if (rock != null)
+            Stone stone = hitCollider.GetComponent<Stone>();
+            if (stone != null)
             {
-                rock.StartBreaking();
+                stone.StartBreaking();
                 break; // Only interact with one object per frame
             }
         }

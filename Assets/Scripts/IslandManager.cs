@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro; // Add this for UI support
 
 public class IslandManager : MonoBehaviour
 {
@@ -14,6 +15,9 @@ public class IslandManager : MonoBehaviour
     private int islandCost = 10; // Initial cost to buy an island
     private GameObject currentShadowIsland; // Stores the active shadow island
 
+    [Header("UI Elements")]
+    public TextMeshProUGUI islandPriceText; // UI text to show the next island price
+
     private void Awake()
     {
         if (Instance == null)
@@ -26,6 +30,7 @@ public class IslandManager : MonoBehaviour
     {
         islandPositions.Add(Vector3.zero);
         CreateShadowIsland();
+        UpdateIslandPriceUI(); // Update UI at start
     }
 
     private void CreateShadowIsland()
@@ -34,7 +39,6 @@ public class IslandManager : MonoBehaviour
         {
             currentShadowIsland = Instantiate(shadowIslandPrefab, Vector3.zero, Quaternion.identity);
             currentShadowIsland.SetActive(true);
-            Debug.Log("Shadow Island Created!");
         }
         else
         {
@@ -57,8 +61,8 @@ public class IslandManager : MonoBehaviour
         GameObject newIsland = Instantiate(islandPrefab, newIslandPosition, Quaternion.identity, islandHolder);
         islandPositions.Add(newIslandPosition);
 
-        Debug.Log("New island purchased at: " + newIslandPosition);
         UpdateShadowIsland(playerPosition);
+        UpdateIslandPriceUI(); // Update UI after buying
     }
 
     public void UpdateShadowIsland(Vector3 playerPosition)
@@ -126,4 +130,11 @@ public class IslandManager : MonoBehaviour
         }
     }
 
+    private void UpdateIslandPriceUI()
+    {
+        if (islandPriceText != null)
+        {
+            islandPriceText.text = "Buy Island: " + islandCost + " Coins";
+        }
+    }
 }

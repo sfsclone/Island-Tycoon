@@ -1,18 +1,18 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class ResourceCollector : MonoBehaviour
 {
-    public float collectionRadius = 2f; // Distance to collect resources automatically
-    public LayerMask resourceLayer; // To filter only resource items
+    public float collectionRadius = 2f;
 
     private void Update()
     {
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, collectionRadius, resourceLayer);
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, collectionRadius);
         foreach (var collider in hitColliders)
         {
             if (collider.TryGetComponent(out ResourceItem resourceItem))
             {
-                resourceItem.Collect();
+                resourceItem.Collect(); // Instantly collect without delay
             }
         }
     }

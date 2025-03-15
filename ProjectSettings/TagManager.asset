@@ -8,8 +8,12 @@ TagManager:
   - Ground
   - Wood
   - Plot
-  - Stone
   - Island
+  - Plank
+  - Brick
+  - Rock
+  - Stone
+  - NPC
   layers:
   - Default
   - TransparentFX

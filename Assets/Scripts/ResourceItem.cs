@@ -1,40 +1,30 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class ResourceItem : MonoBehaviour
 {
-    public enum ResourceType { Wood, Stone }
+    public enum ResourceType { Wood, Rock, Plank, Brick }
     public ResourceType resourceType;
 
-    public float pickupRange = 0.5f;
-    public int resourceAmount = 1;
+    public int resourceAmount = 5; // Default amount per prefab
 
-    private Transform player;
-    private bool collected = false; // Prevents double collection
-
-    private static Dictionary<ResourceType, List<GameObject>> collectedResources = new Dictionary<ResourceType, List<GameObject>>()
-    {
-        { ResourceType.Wood, new List<GameObject>() },
-        { ResourceType.Stone, new List<GameObject>() }
-    };
+    private bool collected = false; // Prevents duplicate collection
+    private static List<GameObject> collectedResources = new List<GameObject>();
+    private static Transform player;
 
     private void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (!collected && other.CompareTag("Player"))
+        if (player == null)
         {
-            collected = true;
-            Collect();
+            player = GameObject.FindGameObjectWithTag("Player").transform;
         }
     }
 
     public void Collect()
     {
+        if (collected) return;
+
+        collected = true;
         Inventory.Instance.AddResource(resourceType.ToString(), resourceAmount);
         AttachToPlayer();
         GetComponent<Collider>().enabled = false;
@@ -42,56 +32,61 @@ public class ResourceItem : MonoBehaviour
 
     private void AttachToPlayer()
     {
-        transform.SetParent(player, true); // Keep world position when attaching
-
-        // Ensure dictionary contains the resource type
-        if (!collectedResources.ContainsKey(resourceType))
-        {
-            collectedResources[resourceType] = new List<GameObject>();
-        }
-
-        // Add the current resource to the correct list
-        collectedResources[resourceType].Add(gameObject);
-        int stackIndex = collectedResources[resourceType].Count - 1;
+        collectedResources.Add(gameObject);
+        int stackIndex = collectedResources.Count - 1;
 
         Debug.Log($"Stacking {resourceType} at index {stackIndex}");
 
-        int rowSize = 2; // Number of items per row
-        float horizontalSpacing = 0.3f;
         float verticalSpacing = 0.4f;
 
-        // Adjust stacking base position per resource type
-        float offset = (resourceType == ResourceItem.ResourceType.Wood) ? -0.3f : 0.3f; // Separate Wood & Stone
-        Vector3 basePosition = player.position - (player.forward * 0.6f) + (Vector3.up * 0.5f) + (player.right * offset);
+        // Base position relative to the player
+        Vector3 basePosition = player.position - (player.forward * 0.6f) + (Vector3.up * 0.5f);
 
-        // Calculate row & column positions
-        int row = stackIndex / rowSize;
-        int col = stackIndex % rowSize;
-
-        Vector3 stackedPosition = basePosition
-                                + (player.right * (col - 0.5f) * horizontalSpacing) // Center items
-                                + (Vector3.up * row * verticalSpacing); // Stack height
+        // Stack all items in a single vertical stack
+        Vector3 stackedPosition = basePosition + (Vector3.up * stackIndex * verticalSpacing);
 
         transform.position = stackedPosition;
-        transform.rotation = player.rotation; // Align with player rotation
+        transform.rotation = player.rotation;
+        transform.SetParent(player, true);
 
-        // Disable physics
         if (TryGetComponent<Rigidbody>(out Rigidbody rb))
         {
             Destroy(rb);
         }
     }
 
-
-
-
     public static void RemoveResourceVisual(ResourceType type)
     {
-        if (collectedResources[type].Count > 0)
+        // Find the first resource of the specified type
+        GameObject resourceToRemove = collectedResources.Find(resource =>
+            resource.GetComponent<ResourceItem>().resourceType == type);
+
+        if (resourceToRemove != null)
         {
-            GameObject resourceToRemove = collectedResources[type][collectedResources[type].Count - 1];
-            collectedResources[type].RemoveAt(collectedResources[type].Count - 1);
+            collectedResources.Remove(resourceToRemove);
             Destroy(resourceToRemove);
+            ReorganizeStack(); // Adjust stacking after removal
+        }
+    }
+
+    private static void ReorganizeStack()
+    {
+        float verticalSpacing = 0.4f;
+
+        if (player == null)
+        {
+            player = GameObject.FindGameObjectWithTag("Player").transform;
+        }
+
+        Vector3 basePosition = player.position - (player.forward * 0.6f) + (Vector3.up * 0.5f);
+
+        for (int i = 0; i < collectedResources.Count; i++)
+        {
+            if (collectedResources[i] != null)
+            {
+                Vector3 stackedPosition = basePosition + (Vector3.up * i * verticalSpacing);
+                collectedResources[i].transform.position = stackedPosition;
+            }
         }
     }
 }
